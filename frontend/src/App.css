@@ -1,0 +1,20 @@
+/* Global CSS (App.css) */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  pointer-events: auto;
+}
+
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  overflow: auto;
+}
+
+.homepage-no-scroll {
+  overflow: hidden;
+}
