@@ -36,7 +36,7 @@ const FindPage = () => {
     if (isAuthenticated) {
       setIsLoading(true);
       axios
-        .get("http://localhost:4000/api/items")
+        .get("https://lostlinkapi.vercel.app/api/items")
         .then((res) => {
           setItems(res.data);
           setFilteredItems(res.data);

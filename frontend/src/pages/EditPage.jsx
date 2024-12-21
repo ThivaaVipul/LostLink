@@ -34,7 +34,7 @@ const EditPage = () => {
     if (!currentUser) return;
 
     axios
-      .get(`http://localhost:4000/api/items/${uniqueLink}`)
+      .get(`https://lostlinkapi.vercel.app/api/items/${uniqueLink}`)
       .then((res) => {
         setItemDetails(res.data);
 
@@ -71,33 +71,32 @@ const EditPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    const postData = new FormData();
-    postData.append("title", formData.title || itemDetails.title);
-    postData.append("description", formData.description || itemDetails.description);
-    postData.append("status", formData.status || itemDetails.status);
-    postData.append("email", formData.email || itemDetails.email);
-    postData.append("phone", formData.phone || itemDetails.phone);
-
-    if (formData.image) {
-      postData.append("image", formData.image);
-    }
-
-    postData.append("uid", currentUser.userId);
-
+  
     try {
-      await axios.put(
-        `http://localhost:4000/api/items/${uniqueLink}`,
+      const postData = new FormData();
+      postData.append("title", formData.title || itemDetails.title);
+      postData.append("description", formData.description || itemDetails.description);
+      postData.append("status", formData.status || itemDetails.status);
+      postData.append("email", formData.email || itemDetails.email);
+      postData.append("phone", formData.phone || itemDetails.phone);
+  
+      if (formData.image) {
+        postData.append("image", formData.image);
+      }
+  
+      const response = await axios.put(
+        `https://lostlinkapi.vercel.app/api/items/${uniqueLink}`,
         postData,
         {
+          "Content-Type": "multipart/form-data",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         }
       );
-      
+  
       alert("Post updated successfully!");
-      navigate('/');
+      navigate("/");
     } catch (err) {
       console.error("Error updating post:", err);
       alert("Failed to update post. Please try again.");
@@ -105,6 +104,7 @@ const EditPage = () => {
       setLoading(false);
     }
   };
+  
 
   if (errorMessage) {
     return (

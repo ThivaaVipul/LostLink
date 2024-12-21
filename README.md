@@ -38,3 +38,14 @@
   - Axios for making API requests
 
 ---
+
+## **Live Demo**
+
+Explore the live application at **[LostLink](https://lostlink.vercel.app/)**.
+
+---
+
+### **Future Enhancements**
+
+- **Real-Time Notifications**: Notify users instantly when their reported items match found items.
+- **Improved UI/UX**: Further enhancements to the user interface for a seamless experience.

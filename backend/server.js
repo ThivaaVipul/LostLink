@@ -8,13 +8,32 @@ const authRoutes = require("./routes/auth");
 require("dotenv").config();
 
 const app = express();
-app.use(cors());
+
+const allowedOrigins = [
+  'https://lostlink.vercel.app',
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
+
+
+app.options('*', cors());
+
 app.use(express.json());
 
 const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/manifest.json', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
+});
+
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -31,10 +50,8 @@ app.get("/", (req, res) => {
 });
 
 const itemRoutes = require("./routes/items");
-
 app.use("/api/items", itemRoutes);
-
-app.use("/api/auth", authRoutes);``
+app.use("/api/auth", authRoutes);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

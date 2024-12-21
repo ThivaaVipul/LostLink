@@ -38,7 +38,7 @@ const ItemDetailsPage = () => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:4000/api/items/${uniqueLink}`)
+      .get(`https://lostlinkapi.vercel.app/api/items/${uniqueLink}`)
       .then((res) => {
         setItemDetails(res.data);
       })
@@ -80,7 +80,7 @@ const ItemDetailsPage = () => {
     const token = localStorage.getItem("authToken");
   
     try {
-      await axios.delete(`http://localhost:4000/api/items/${uniqueLink}`, {
+      await axios.delete(`https://lostlinkapi.vercel.app/api/items/${uniqueLink}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Item and image deleted successfully!");

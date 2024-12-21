@@ -27,7 +27,7 @@ const SignupPage = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:4000/api/auth/signup", formData);
+      const response = await axios.post("https://lostlinkapi.vercel.app/api/auth/signup", formData);
 
       localStorage.setItem("authToken", response.data.token);
 
