@@ -50,6 +50,7 @@ const PostPage = () => {
     e.preventDefault();
     setLoading(true);
 
+    console.log("Selected Image:", formData.image);
 
     const postData = new FormData();
     postData.append("title", formData.title);
@@ -57,15 +58,20 @@ const PostPage = () => {
     postData.append("status", formData.status);
     postData.append("email", formData.email);
     postData.append("phone", formData.phone);
-    postData.append("postedBy", "username");
+    postData.append("postedBy", currentUser.userName);
     postData.append("image", formData.image);
     postData.append("uid", currentUser.userId);
 
 
     try {
       console.log(postData);
-      await axios.post("http://localhost:4000/api/items", postData, {
+      for (let [key, value] of postData.entries()) {
+        console.log(key, value);
+      }
+      
+      await axios.post("https://lostlinkapi.vercel.app/api/items", postData, {
         headers: {
+          "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
       });

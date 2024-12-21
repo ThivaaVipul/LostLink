@@ -17,7 +17,7 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:4000/api/auth/login", formData);
+      const response = await axios.post("https://lostlinkapi.vercel.app/api/auth/login", formData);
       
       localStorage.setItem("authToken", response.data.token);
 

@@ -12,16 +12,18 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
+const storage = multer.memoryStorage();
 
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Only image files are allowed.'));
+    }
+    cb(null, true);
+  }
+});
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -36,55 +38,56 @@ const generateUniqueLink = (username) => {
 
 router.post("/", upload.single("image"), async (req, res) => {
   try {
+    console.log("Request Body:", req.body);
+    console.log("Uploaded File:", req.file);
+
     const { title, description, status, email, phone, postedBy, uid } = req.body;
-    const image = req.file ? req.file : null;
 
-    console.log("Received data:", req.body);
-    console.log("Email from request body:", email);
-
-    if (!email || typeof email !== 'string') {
-      return res.status(400).json({ message: "Email is required and must be a valid string." });
+    if (!req.file) {
+      return res.status(400).json({ message: "Image file is required." });
     }
 
     const uniqueLink = generateUniqueLink(email.split("@")[0]);
 
-    console.log("Request body:", req.body);
-    console.log("Uploaded file:", req.file);
-
-    if (!title || !description || !status || !email || !phone || !postedBy || !image || !uid) {
+    if (!title || !description || !status || !email || !phone || !postedBy || !uid) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    let imageURL = "";
-    if (image) {
-      const result = await cloudinary.uploader.upload(image.path, {
+    cloudinary.uploader.upload_stream(
+      {
         folder: "lostlink_images",
-      });
-      imageURL = result.secure_url;
-      console.log("Cloudinary result:", result);
-    }
+      },
+      async (error, result) => {
+        if (error) {
+          console.error("Cloudinary upload failed:", error);
+          return res.status(500).json({ message: "Error uploading image to Cloudinary", error });
+        }
 
-    const newItem = new Item({
-      title,
-      description,
-      status,
-      email,
-      phone,
-      imageURL,
-      createdAt: Date.now(),
-      postedBy,
-      uniqueLink,
-      uid
-    });
+        const newItem = new Item({
+          title,
+          description,
+          status,
+          email,
+          phone,
+          imageURL: result.secure_url,
+          createdAt: Date.now(),
+          postedBy,
+          uniqueLink,
+          uid,
+        });
 
-    await newItem.save();
-    res.status(201).json({
-      message: "Item created successfully",
-      newItem,
-    });
+        try {
+          await newItem.save();
+          res.status(201).json({ message: "Item created successfully", newItem });
+        } catch (err) {
+          console.error("Database save error:", err);
+          res.status(500).json({ error: err.message });
+        }
+      }
+    ).end(req.file.buffer);
   } catch (err) {
-    console.error("Error creating post:", err.message);
-    res.status(500).json({ error: `Failed to create post: ${err.message}` });
+    console.error("Error:", err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -113,7 +116,6 @@ router.delete("/:uniqueLink", authMiddleware, async (req, res) => {
   const { uniqueLink } = req.params;
 
   try {
-    // Find the item by uniqueLink
     const item = await Item.findOne({ uniqueLink });
     if (!item) {
       return res.status(404).json({ message: "Item not found." });
@@ -144,8 +146,6 @@ router.delete("/:uniqueLink", authMiddleware, async (req, res) => {
   }
 });
 
-
-
 router.put("/:uniqueLink", authMiddleware, upload.single("image"), async (req, res) => {
   const { uniqueLink } = req.params;
   const { title, description, status, email, phone } = req.body;
@@ -156,42 +156,44 @@ router.put("/:uniqueLink", authMiddleware, upload.single("image"), async (req, r
       return res.status(404).json({ message: "Item not found." });
     }
 
-    // Update fields
     item.title = title || item.title;
     item.description = description || item.description;
     item.status = status || item.status;
     item.email = email || item.email;
     item.phone = phone || item.phone;
 
-    // Handle new image upload
     if (req.file) {
-      // Delete old Cloudinary image if it exists
-      if (item.imageURL) {
-        const publicId = item.imageURL.split("/").pop().split(".")[0];
-        await cloudinary.uploader.destroy(`lostlink_images/${publicId}`);
-      }
+      const publicId = item.imageURL.split("/").pop().split(".")[0];
+      await cloudinary.uploader.destroy(`lostlink_images/${publicId}`);
 
-      // Upload new image to Cloudinary
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "lostlink_images",
-      });
-      item.imageURL = result.secure_url;
+      cloudinary.uploader.upload_stream(
+        {
+          folder: "lostlink_images",
+        },
+        async (error, result) => {
+          if (error) {
+            console.error("Cloudinary upload failed:", error);
+            return res.status(500).json({ message: "Error uploading image to Cloudinary", error });
+          }
 
-      // Delete the uploaded temp file
-      fs.unlinkSync(req.file.path);
+          item.imageURL = result.secure_url;
+          try {
+            await item.save();
+            res.status(200).json({ message: "Item updated successfully.", item });
+          } catch (err) {
+            console.error("Database save error:", err);
+            res.status(500).json({ error: err.message });
+          }
+        }
+      ).end(req.file.buffer);
+    } else {
+      await item.save();
+      res.status(200).json({ message: "Item updated successfully.", item });
     }
-
-    await item.save();
-    res.status(200).json({ message: "Item updated successfully.", item });
   } catch (err) {
-    console.error("Error updating item:", err.message);
-    res.status(500).json({ message: "Internal server error.", error: err.message });
+    console.error("Error:", err.message);
+    res.status(500).json({ error: err.message });
   }
 });
-
-
-
-
-
 
 module.exports = router;
