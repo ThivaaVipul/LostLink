@@ -9,6 +9,8 @@ import FindPage from "./pages/FindPage";
 import EditPage from "./pages/EditPage";
 import 'font-awesome/css/font-awesome.css';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 
@@ -17,6 +19,7 @@ function App() {
     <div>
       <SpeedInsights />
       <Router>
+        <ToastContainer position="bottom-center" />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/post" element={<PostPage />} />

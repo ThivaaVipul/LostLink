@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { toast, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -20,8 +22,17 @@ const LoginPage = () => {
       const response = await axios.post("https://lostlinkapi.vercel.app/api/auth/login", formData);
       
       localStorage.setItem("authToken", response.data.token);
-
-      alert("Login successful!");
+      
+      toast.success('Login successful!', {
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover:false,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+        });
       navigate("/");
     } catch (err) {
       setError(err.response?.data?.message || "Invalid credentials!");

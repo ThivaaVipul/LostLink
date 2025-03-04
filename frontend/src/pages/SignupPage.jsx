@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { toast, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
@@ -31,7 +33,16 @@ const SignupPage = () => {
 
       localStorage.setItem("authToken", response.data.token);
 
-      alert("Signup successful! Please log in.");
+      toast.success('Signup successful! Please log in.', {
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover:false,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+        });
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong!");

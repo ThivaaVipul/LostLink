@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { jwtDecode } from "jwt-decode";
+import { toast, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 const PostPage = () => {
@@ -50,7 +52,9 @@ const PostPage = () => {
     e.preventDefault();
     setLoading(true);
 
-    console.log("Selected Image:", formData.image);
+    const toastId = toast.loading("Submitting your post...", {
+      theme: "light",
+    });
 
     const postData = new FormData();
     postData.append("title", formData.title);
@@ -64,22 +68,29 @@ const PostPage = () => {
 
 
     try {
-      console.log(postData);
-      for (let [key, value] of postData.entries()) {
-        console.log(key, value);
-      }
-      
       await axios.post("https://lostlinkapi.vercel.app/api/items", postData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
       });
-      alert("Post created successfully!");
+      toast.update(toastId, {
+        render: "Post created successfully!",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+        transition: Bounce,
+      });
       navigate("/");
     } catch (err) {
       console.error("Error creating post:", err);
-      alert("Failed to create post. Please try again.");
+      toast.update(toastId, {
+        render: "Failed to create post. Please try again.",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+        transition: Bounce,
+      });
     } finally {
       setLoading(false);
     }

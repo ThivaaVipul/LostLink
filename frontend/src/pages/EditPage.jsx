@@ -4,6 +4,9 @@ import axios from "axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { jwtDecode } from "jwt-decode";
+import { toast, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const EditPage = () => {
   const { uniqueLink } = useParams();
@@ -71,6 +74,10 @@ const EditPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    const toastId = toast.loading("Updating post...", {
+      theme: "light",
+    });
   
     try {
       const postData = new FormData();
@@ -84,7 +91,7 @@ const EditPage = () => {
         postData.append("image", formData.image);
       }
   
-      const response = await axios.put(
+      await axios.put(
         `https://lostlinkapi.vercel.app/api/items/${uniqueLink}`,
         postData,
         {
@@ -95,11 +102,23 @@ const EditPage = () => {
         }
       );
   
-      alert("Post updated successfully!");
+      toast.update(toastId, {
+        render: "Post updated successfully!",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+        transition: Bounce,
+      });
       navigate("/");
     } catch (err) {
       console.error("Error updating post:", err);
-      alert("Failed to update post. Please try again.");
+      toast.update(toastId, {
+        render: "Failed to update post. Please try again.",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+        transition: Bounce,
+      });
     } finally {
       setLoading(false);
     }

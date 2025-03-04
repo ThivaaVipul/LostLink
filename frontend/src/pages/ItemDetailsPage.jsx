@@ -4,6 +4,8 @@ import axios from "axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { jwtDecode } from "jwt-decode";
+import { toast, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -83,11 +85,29 @@ const ItemDetailsPage = () => {
       await axios.delete(`https://lostlinkapi.vercel.app/api/items/${uniqueLink}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      alert("Item and image deleted successfully!");
+      toast.success('Item and image deleted successfully!', {
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover:false,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+        });
       navigate("/");
     } catch (err) {
       console.error("Error deleting item:", err);
-      alert("Failed to delete item.");
+      toast.error('Failed to delete item.', {
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover:false,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+        });
     }
   };
   
