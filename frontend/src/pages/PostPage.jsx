@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { jwtDecode } from "jwt-decode";
+import { API_BASE_URL } from "../config";
 import { toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -68,7 +69,7 @@ const PostPage = () => {
 
 
     try {
-      await axios.post("https://lostlinkapi.vercel.app/api/items", postData, {
+      await axios.post(`${API_BASE_URL}/api/items`, postData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,

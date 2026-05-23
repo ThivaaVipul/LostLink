@@ -4,6 +4,7 @@ import axios from "axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { jwtDecode } from "jwt-decode";
+import { API_BASE_URL } from "../config";
 import { toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -37,7 +38,7 @@ const EditPage = () => {
     if (!currentUser) return;
 
     axios
-      .get(`https://lostlinkapi.vercel.app/api/items/${uniqueLink}`)
+      .get(`${API_BASE_URL}/api/items/${uniqueLink}`)
       .then((res) => {
         setItemDetails(res.data);
 
@@ -92,7 +93,7 @@ const EditPage = () => {
       }
   
       await axios.put(
-        `https://lostlinkapi.vercel.app/api/items/${uniqueLink}`,
+        `${API_BASE_URL}/api/items/${uniqueLink}`,
         postData,
         {
           "Content-Type": "multipart/form-data",

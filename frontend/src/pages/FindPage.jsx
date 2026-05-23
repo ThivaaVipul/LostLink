@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
@@ -36,7 +37,7 @@ const FindPage = () => {
     if (isAuthenticated) {
       setIsLoading(true);
       axios
-        .get("https://lostlinkapi.vercel.app/api/items")
+        .get(`${API_BASE_URL}/api/items`)
         .then((res) => {
           setItems(res.data);
           setFilteredItems(res.data);

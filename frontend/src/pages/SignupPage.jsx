@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { API_BASE_URL } from "../config";
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
@@ -29,7 +30,7 @@ const SignupPage = () => {
     }
 
     try {
-      const response = await axios.post("https://lostlinkapi.vercel.app/api/auth/signup", formData);
+      const response = await axios.post(`${API_BASE_URL}/api/auth/signup`, formData);
 
       localStorage.setItem("authToken", response.data.token);
 

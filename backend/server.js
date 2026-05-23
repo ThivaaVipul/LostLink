@@ -11,15 +11,13 @@ const app = express();
 
 const allowedOrigins = [
   'https://lostlink.vercel.app',
+  'http://localhost:3000',
 ];
 
 app.use(cors({
   origin: allowedOrigins,
   credentials: true
 }));
-
-
-app.options('*', cors());
 
 app.use(express.json());
 
