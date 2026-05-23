@@ -15,6 +15,7 @@ const SignupPage = () => {
     confirmPassword: "",
   });
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -24,17 +25,37 @@ const SignupPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
+      const message = "Passwords do not match.";
+      setError(message);
+      toast.error(message, {
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover:false,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+        });
       return;
     }
 
+    setIsSubmitting(true);
+
+    const toastId = toast.loading("Creating account...", {
+      theme: "light",
+    });
+
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/auth/signup`, formData);
+      await axios.post(`${API_BASE_URL}/api/auth/signup`, formData);
 
-      localStorage.setItem("authToken", response.data.token);
-
-      toast.success('Signup successful! Please log in.', {
+      toast.update(toastId, {
+        render: "Signup successful! Please log in.",
+        type: "success",
+        isLoading: false,
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -46,7 +67,23 @@ const SignupPage = () => {
         });
       navigate("/login");
     } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong!");
+      const message = err.response?.data?.message || "Something went wrong!";
+      setError(message);
+      toast.update(toastId, {
+        render: message,
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover:false,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+        });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -67,6 +104,7 @@ const SignupPage = () => {
                 onChange={handleChange}
                 placeholder="Enter your username"
                 className="w-full mt-2 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                disabled={isSubmitting}
                 required
               />
             </div>
@@ -80,6 +118,7 @@ const SignupPage = () => {
                 onChange={handleChange}
                 placeholder="Enter your email"
                 className="w-full mt-2 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                disabled={isSubmitting}
                 required
               />
             </div>
@@ -93,6 +132,7 @@ const SignupPage = () => {
                 onChange={handleChange}
                 placeholder="Enter your password"
                 className="w-full mt-2 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                disabled={isSubmitting}
                 required
               />
             </div>
@@ -106,15 +146,17 @@ const SignupPage = () => {
                 onChange={handleChange}
                 placeholder="Confirm your password"
                 className="w-full mt-2 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                disabled={isSubmitting}
                 required
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition duration-300"
+              disabled={isSubmitting}
+              className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition duration-300 disabled:cursor-not-allowed disabled:bg-blue-400"
             >
-              Signup
+              {isSubmitting ? "Creating account..." : "Signup"}
             </button>
           </form>
 

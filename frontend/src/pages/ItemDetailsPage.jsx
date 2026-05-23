@@ -30,6 +30,8 @@ const ItemDetailsPage = () => {
   const [itemDetails, setItemDetails] = useState(null);
   const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -81,12 +83,20 @@ const ItemDetailsPage = () => {
 
   const handleDelete = async () => {
     const token = localStorage.getItem("authToken");
+    setIsDeleting(true);
+
+    const toastId = toast.loading("Deleting item...", {
+      theme: "light",
+    });
   
     try {
       await axios.delete(`${API_BASE_URL}/api/items/${uniqueLink}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success('Item and image deleted successfully!', {
+      toast.update(toastId, {
+        render: "Item and image deleted successfully!",
+        type: "success",
+        isLoading: false,
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -99,7 +109,10 @@ const ItemDetailsPage = () => {
       navigate("/");
     } catch (err) {
       console.error("Error deleting item:", err);
-      toast.error('Failed to delete item.', {
+      toast.update(toastId, {
+        render: "Failed to delete item.",
+        type: "error",
+        isLoading: false,
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -109,6 +122,7 @@ const ItemDetailsPage = () => {
         theme: "light",
         transition: Bounce,
         });
+      setIsDeleting(false);
     }
   };
   
@@ -137,7 +151,7 @@ const ItemDetailsPage = () => {
               {/* Show Delete button if current user created the post OR if the user is an admin */}
               {(currentUser.userId === uid || currentUser.role === "admin") && (
                 <button
-                  onClick={handleDelete}
+                  onClick={() => setShowDeleteConfirm(true)}
                   className="ml-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300"
                 >
                   Delete
@@ -283,6 +297,34 @@ const ItemDetailsPage = () => {
           </div>
         </div>
       </div>
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+            <h3 className="text-xl font-semibold text-gray-900">Delete item?</h3>
+            <p className="mt-3 text-gray-600">
+              This will permanently delete this item and its image. This action cannot be undone.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition duration-300 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition duration-300 disabled:cursor-not-allowed disabled:bg-red-400"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <Footer />
     </>
   );

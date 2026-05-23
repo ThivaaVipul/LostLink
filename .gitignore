@@ -7,6 +7,7 @@ node_modules/
 
 # Build output
 frontend/build/
+frontend/dist/
 backend/node_modules/
 backend/dist/
 backend/uploads/

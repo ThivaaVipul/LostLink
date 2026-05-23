@@ -10,6 +10,7 @@ import { API_BASE_URL } from "../config";
 const LoginPage = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -19,12 +20,22 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
+    const toastId = toast.loading("Logging in...", {
+      theme: "light",
+    });
+
     try {
       const response = await axios.post(`${API_BASE_URL}/api/auth/login`, formData);
       
       localStorage.setItem("authToken", response.data.token);
       
-      toast.success('Login successful!', {
+      toast.update(toastId, {
+        render: "Login successful!",
+        type: "success",
+        isLoading: false,
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -36,7 +47,23 @@ const LoginPage = () => {
         });
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || "Invalid credentials!");
+      const message = err.response?.data?.message || "Invalid credentials!";
+      setError(message);
+      toast.update(toastId, {
+        render: message,
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover:false,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+        });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -55,6 +82,7 @@ const LoginPage = () => {
               onChange={handleChange}
               placeholder="Email"
               className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              disabled={isSubmitting}
               required
             />
 
@@ -65,14 +93,16 @@ const LoginPage = () => {
               onChange={handleChange}
               placeholder="Password"
               className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              disabled={isSubmitting}
               required
             />
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition duration-300"
+              disabled={isSubmitting}
+              className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition duration-300 disabled:cursor-not-allowed disabled:bg-blue-400"
             >
-              Login
+              {isSubmitting ? "Logging in..." : "Login"}
             </button>
           </form>
 
