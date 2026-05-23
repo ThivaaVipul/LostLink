@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const cloudinary = require("cloudinary").v2;
 const path = require("path");
-const fs = require("fs");
 const authRoutes = require("./routes/auth");
 require("dotenv").config();
 
@@ -20,11 +19,6 @@ app.use(cors({
 }));
 
 app.use(express.json());
-
-const uploadsDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
-}
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -52,4 +46,8 @@ app.use("/api/items", itemRoutes);
 app.use("/api/auth", authRoutes);
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+module.exports = app;
