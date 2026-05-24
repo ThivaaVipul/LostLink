@@ -3,7 +3,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { jwtDecode } from "jwt-decode";
 import { API_BASE_URL } from "../config";
 import { toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -20,7 +19,6 @@ const PostPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,14 +39,6 @@ const PostPage = () => {
     setFormData({ ...formData, image: e.target.files[0] });
   };
 
-    useEffect(() => {
-      const token = localStorage.getItem("authToken");
-      if (token) {
-        const decoded = jwtDecode(token);
-        setCurrentUser(decoded);
-      }
-    }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -63,9 +53,7 @@ const PostPage = () => {
     postData.append("status", formData.status);
     postData.append("email", formData.email);
     postData.append("phone", formData.phone);
-    postData.append("postedBy", currentUser.userName);
     postData.append("image", formData.image);
-    postData.append("uid", currentUser.userId);
 
 
     try {

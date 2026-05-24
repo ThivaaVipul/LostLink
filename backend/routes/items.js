@@ -29,20 +29,24 @@ const generateUniqueLink = (username) => {
   return `${username}-${timestamp}`;
 };
 
-router.post("/", upload.single("image"), async (req, res) => {
+const canManageItem = (item, user) => {
+  return item.uid.toString() === user.userId || user.role === "admin";
+};
+
+router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
   try {
     console.log("Request Body:", req.body);
     console.log("Uploaded File:", req.file);
 
-    const { title, description, status, email, phone, postedBy, uid } = req.body;
+    const { title, description, status, email, phone } = req.body;
 
     if (!req.file) {
       return res.status(400).json({ message: "Image file is required." });
     }
 
-    const uniqueLink = generateUniqueLink(email.split("@")[0]);
+    const uniqueLink = generateUniqueLink(req.user.userName);
 
-    if (!title || !description || !status || !email || !phone || !postedBy || !uid) {
+    if (!title || !description || !status || !email || !phone) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
@@ -64,9 +68,9 @@ router.post("/", upload.single("image"), async (req, res) => {
           phone,
           imageURL: result.secure_url,
           createdAt: Date.now(),
-          postedBy,
+          postedBy: req.user.userName,
           uniqueLink,
-          uid,
+          uid: req.user.userId,
         });
 
         try {
@@ -114,8 +118,9 @@ router.delete("/:uniqueLink", authMiddleware, async (req, res) => {
       return res.status(404).json({ message: "Item not found." });
     }
 
-    const userId = req.user.userId;
-    const userRole = req.user.role;
+    if (!canManageItem(item, req.user)) {
+      return res.status(403).json({ message: "You are not authorized to delete this item." });
+    }
 
     if (item.imageURL) {
       const publicId = item.imageURL.split("/").pop().split(".")[0];
@@ -147,6 +152,10 @@ router.put("/:uniqueLink", authMiddleware, upload.single("image"), async (req, r
     const item = await Item.findOne({ uniqueLink });
     if (!item) {
       return res.status(404).json({ message: "Item not found." });
+    }
+
+    if (!canManageItem(item, req.user)) {
+      return res.status(403).json({ message: "You are not authorized to update this item." });
     }
 
     item.title = title || item.title;
