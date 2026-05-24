@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../api";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import LoadingImage from "../components/LoadingImage";
 import { getCurrentUser } from "../auth";
 import { toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -158,10 +159,11 @@ const ItemDetailsPage = () => {
           {/* Image and Description */}
           <div className="flex justify-center mb-6">
             <div className="w-full max-w-2xl">
-              <img
+              <LoadingImage
                 src={imageURL || "https://via.placeholder.com/500"}
                 alt={title}
-                className="w-full h-auto object-cover rounded-lg shadow-md"
+                wrapperClassName="rounded-lg shadow-md"
+                className="w-full h-auto object-cover"
               />
               <p className="text-lg text-gray-700 mt-6">{description}</p>
             </div>
@@ -290,11 +292,21 @@ const ItemDetailsPage = () => {
         </div>
       </div>
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 px-4">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <h3 className="text-xl font-semibold text-gray-900">Delete item?</h3>
-            <p className="mt-3 text-gray-600">
-              This will permanently delete this item and its image. This action cannot be undone.
+            <div className="flex items-start gap-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
+                <span className="text-2xl font-semibold leading-none">!</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900">Delete this item?</h3>
+                <p className="mt-2 text-sm leading-6 text-gray-600">
+                  This item and its image will be permanently removed from LostLink.
+                </p>
+              </div>
+            </div>
+            <p className="mt-4 rounded-md bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              This action cannot be undone.
             </p>
             <div className="mt-6 flex justify-end gap-3">
               <button

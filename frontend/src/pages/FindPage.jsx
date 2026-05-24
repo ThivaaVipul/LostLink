@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { isAuthenticated as hasValidSession } from "../auth";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import LoadingImage from "../components/LoadingImage";
 
 const Spinner = () => (
   <div className="flex flex-col justify-center items-center">
@@ -180,10 +181,11 @@ const FindPage = () => {
                         key={item._id}
                         className="bg-white p-6 rounded-lg shadow-md transition transform hover:scale-105"
                       >
-                        <img
+                        <LoadingImage
                           src={item.imageURL}
                           alt={item.title}
-                          className="w-full h-64 object-cover rounded-md mb-4"
+                          wrapperClassName="mb-4 h-64 rounded-md"
+                          className="h-full w-full object-cover"
                         />
                         <h3 className="text-xl font-bold text-gray-800 mb-2">{item.title}</h3>
                         <p className="text-gray-600 mb-4">{item.description}</p>
