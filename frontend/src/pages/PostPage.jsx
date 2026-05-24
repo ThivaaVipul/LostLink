@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { API_BASE_URL } from "../config";
+import { isAuthenticated as hasValidSession } from "../auth";
 import { toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -22,12 +22,7 @@ const PostPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      setIsAuthenticated(true);
-    } else {
-      setIsAuthenticated(false);
-    }
+    setIsAuthenticated(hasValidSession());
   }, []);
 
   const handleChange = (e) => {
@@ -57,10 +52,9 @@ const PostPage = () => {
 
 
     try {
-      await axios.post(`${API_BASE_URL}/api/items`, postData, {
+      await api.post("/api/items", postData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
       });
       toast.update(toastId, {

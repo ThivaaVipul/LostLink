@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { jwtDecode } from "jwt-decode";
-import { API_BASE_URL } from "../config";
+import { getCurrentUser } from "../auth";
 import { toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -25,10 +24,9 @@ const EditPage = () => {
   const [itemDetails, setItemDetails] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      const decoded = jwtDecode(token);
-      setCurrentUser(decoded);
+    const user = getCurrentUser();
+    if (user) {
+      setCurrentUser(user);
     } else {
       setErrorMessage("You need to log in to edit this item.");
     }
@@ -37,8 +35,8 @@ const EditPage = () => {
   useEffect(() => {
     if (!currentUser) return;
 
-    axios
-      .get(`${API_BASE_URL}/api/items/${uniqueLink}`)
+    api
+      .get(`/api/items/${uniqueLink}`)
       .then((res) => {
         setItemDetails(res.data);
 
@@ -92,14 +90,11 @@ const EditPage = () => {
         postData.append("image", formData.image);
       }
   
-      await axios.put(
-        `${API_BASE_URL}/api/items/${uniqueLink}`,
+      await api.put(
+        `/api/items/${uniqueLink}`,
         postData,
         {
           "Content-Type": "multipart/form-data",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
         }
       );
   

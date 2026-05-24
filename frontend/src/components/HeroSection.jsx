@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { getCurrentUser } from "../auth";
 
 const HeroSection = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState(""); 
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
+    const user = getCurrentUser();
 
-    if (token) {
+    if (user) {
       setIsLoggedIn(true);
-      const decodedToken = JSON.parse(atob(token.split(".")[1]));
-      setUsername(decodedToken?.userName || "User");
+      setUsername(user.userName || "User");
     } else {
       setIsLoggedIn(false);
     }

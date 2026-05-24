@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { API_BASE_URL } from "../config";
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
@@ -50,7 +49,7 @@ const SignupPage = () => {
     });
 
     try {
-      await axios.post(`${API_BASE_URL}/api/auth/signup`, formData);
+      await api.post("/api/auth/signup", formData);
 
       toast.update(toastId, {
         render: "Signup successful! Please log in.",

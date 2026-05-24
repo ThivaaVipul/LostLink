@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { clearAuthToken, getAuthToken, getCurrentUser } from "../auth";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,26 +17,17 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
+    clearAuthToken();
     navigate("/login");
   };
 
   // Check if user is logged in
-  const isLoggedIn = localStorage.getItem("authToken");
+  const isLoggedIn = getAuthToken();
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      try {
-        const parts = token.split(".");
-        if (parts.length !== 3) throw new Error("Invalid token format");
-        const decodedToken = JSON.parse(atob(parts[1]));
-        setUsername(decodedToken?.userName || "User");
-      } catch (err) {
-        console.error("Invalid token:", err.message);
-        localStorage.removeItem("authToken");
-        setUsername("");
-      }
+    const user = getCurrentUser();
+    if (user) {
+      setUsername(user.userName || "User");
     }
   }, []);
 

@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { jwtDecode } from "jwt-decode";
-import { API_BASE_URL } from "../config";
+import { getCurrentUser } from "../auth";
 import { toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -34,16 +33,12 @@ const ItemDetailsPage = () => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      const decoded = jwtDecode(token);
-      setCurrentUser(decoded);
-    }
+    setCurrentUser(getCurrentUser());
   }, []);
 
   useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/api/items/${uniqueLink}`)
+    api
+      .get(`/api/items/${uniqueLink}`)
       .then((res) => {
         setItemDetails(res.data);
       })
@@ -82,7 +77,6 @@ const ItemDetailsPage = () => {
   };
 
   const handleDelete = async () => {
-    const token = localStorage.getItem("authToken");
     setIsDeleting(true);
 
     const toastId = toast.loading("Deleting item...", {
@@ -90,9 +84,7 @@ const ItemDetailsPage = () => {
     });
   
     try {
-      await axios.delete(`${API_BASE_URL}/api/items/${uniqueLink}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/api/items/${uniqueLink}`);
       toast.update(toastId, {
         render: "Item and image deleted successfully!",
         type: "success",

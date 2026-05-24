@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { API_BASE_URL } from "../config";
+import { setAuthToken } from "../auth";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -28,9 +28,9 @@ const LoginPage = () => {
     });
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, formData);
+      const response = await api.post("/api/auth/login", formData);
       
-      localStorage.setItem("authToken", response.data.token);
+      setAuthToken(response.data.token);
       
       toast.update(toastId, {
         render: "Login successful!",

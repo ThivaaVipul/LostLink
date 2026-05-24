@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../config";
+import { isAuthenticated as hasValidSession } from "../auth";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
@@ -25,19 +25,14 @@ const FindPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      setIsAuthenticated(true);
-    } else {
-      setIsAuthenticated(false);
-    }
+    setIsAuthenticated(hasValidSession());
   }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
       setIsLoading(true);
-      axios
-        .get(`${API_BASE_URL}/api/items`)
+      api
+        .get("/api/items")
         .then((res) => {
           setItems(res.data);
           setFilteredItems(res.data);
